@@ -29,14 +29,19 @@ func main() {
 		return
 	}
 
-	var config config
-	if err := readConfig(configPath, &config); err != nil {
+	var cfg config
+	if err := readConfig(configPath, &cfg); err != nil {
 		log.Fatal(err)
 		return
 	}
 
+	rest := newhostingDeRestAPI(cfg.URL, cfg.AuthToken)
+
+	response, err := rest.zonesFind()
+
 	fmt.Printf("hello, world: %s\n", configPath)
-	fmt.Printf("%s\n", config)
+	fmt.Printf("config: %s\n", cfg)
+	fmt.Printf("response: %s\n", response)
 
 	switch os := runtime.GOOS; os {
 	case "darwin":

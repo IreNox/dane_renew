@@ -8,9 +8,9 @@ import (
 )
 
 type config struct {
-	URL     string   `json:"url"`
-	APIKey  string   `json:"apiKey"`
-	Domains []string `json:"domains"`
+	URL     	string   `json:"url"`
+	AuthToken   string   `json:"authToken"`
+	Domains 	[]string `json:"domains"`
 }
 
 func readConfig(configPath string, config *config) error {
