@@ -37,11 +37,13 @@ func main() {
 
 	rest := newhostingDeRestAPI(cfg.URL, cfg.AuthToken)
 
-	response, err := rest.zonesFind()
+	if err := createAuthRecord(rest, "sys.ioniel.net", "..."); err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	fmt.Printf("hello, world: %s\n", configPath)
 	fmt.Printf("config: %s\n", cfg)
-	fmt.Printf("response: %s\n", response)
 
 	switch os := runtime.GOOS; os {
 	case "darwin":
