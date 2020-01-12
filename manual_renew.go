@@ -18,7 +18,7 @@ func findZone(rest *hostingDeRestAPI, domain string) (*hostingDeZoneConfig, erro
 
 	zones, err := rest.zonesFind()
 	if err != nil {
-		return nil, err
+		return nil,err
 	}
 
 	for _, zone := range zones.Response.Data {
@@ -36,7 +36,7 @@ func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) 
 		return err
 	}
 
-	recordsToAdd := []hostingDeRecord{hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	recordsToAdd := []hostingDeRecord{hostingDeRecord{"authChallenge", "TXT", "_acme-challenge." + domain, validation, 120}}
 	recordsToDelete := []hostingDeRecord{}
 	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
 	if err != nil {
@@ -53,7 +53,7 @@ func deleteAuthRecord(rest* hostingDeRestAPI, domain string, validation string) 
 	}
 
 	recordsToAdd := []hostingDeRecord{}
-	recordsToDelete := []hostingDeRecord{hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	recordsToDelete := []hostingDeRecord{} //hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
 	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
 	if err != nil {
 		return err

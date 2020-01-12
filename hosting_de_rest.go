@@ -15,13 +15,30 @@ type hostingDeRestAPI struct {
 	authToken string
 }
 
-type hostingDeZoneConfigsFindRequest struct {
-	AuthToken string `json:"authToken"`
+type hostingDeErrorDetail struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type hostingDeError struct {
+	Code          int                    `json:"code"`
+	ContextObject string                 `json:"contextObject"`
+	ContextPath   string                 `json:"contextPath"`
+	Details       []hostingDeErrorDetail `json:"details"`
+	Text          string                 `json:"text"`
+	Value         string                 `json:"value"`
 }
 
 type hostingDeMetadata struct {
 	ClientTransactionID string `json:"clientTransactionId"`
 	ServerTransactionID string `json:"serverTransactionId"`
+}
+
+type hostingDeResponse struct {
+	Errors   []hostingDeError  `json:"errors"`
+	Warnings []string          `json:"warnings"`
+	Status   string            `json:"status"`
+	Metadata hostingDeMetadata `json:"metadata"`
 }
 
 type hostingDeZoneConfigSoaValues struct {
@@ -48,24 +65,42 @@ type hostingDeZoneConfig struct {
 	ZoneTransferWhitelist []string                     `json:"zoneTransferWhitelist"`
 }
 
+type hostingDeRecord struct {
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	Name	string `json:"name"`
+	Content string `json:"content"`
+	TTL     int    `json:"ttl"`
+}
+
+type hostingDeZoneConfigsFindRequest struct {
+	AuthToken string `json:"authToken"`
+}
+
 type hostingDeZoneConfigsFindResponseData struct {
 	Data []hostingDeZoneConfig `json:"data"`
 }
 
 type hostingDeZoneConfigsFindResponse struct {
-	Errors   []string                             `json:"errors"`
-	Warnings []string                             `json:"warnings"`
-	Status   string                               `json:"status"`
-	Metadata hostingDeMetadata                    `json:"metadata"`
 	Response hostingDeZoneConfigsFindResponseData `json:"response"`
 }
 
-type hostingDeRecord struct {
-	//ID      string `json:"id"`
-	Type    string `json:"type"`
-	Name	string `json:"name"`
-	Content string `json:"content"`
-	TTL     int    `json:"ttl"`
+type hostingDeRecordsFindRequest struct {
+	AuthToken string                            `json:"authToken"`
+	Filter    hostingDeRecordsFindRequestFilter `json:"filter"`
+}
+
+type hostingDeRecordsFindRequestFilter struct {
+	Field string `json:"field"`
+	Value string `json:"value"`
+}
+
+type hostingDeRecordsFindResponse struct {
+	Response hostingDeZoneConfigsFindResponseData `json:"response"`
+}
+
+type hostingDeRecordsFindResponseData struct {
+	Data []hostingDeZoneConfig `json:"data"`
 }
 
 type hostingDeZoneUpdateRequest struct {
@@ -123,6 +158,19 @@ func (rest *hostingDeRestAPI) call(function string, request interface{}, respons
 
 	ioutil.WriteFile("D:\\test.json", buf.Bytes(), 0777)
 
+	var restResponse hostingDeResponse
+	err = json.Unmarshal(buf.Bytes(), restResponse)
+	if err != nil {
+		return err
+	}
+
+	if len(restResponse.Errors) > 0 {
+		var 
+		for _, restError := range restResponse.Erros {
+
+		}
+	}
+
 	err = json.Unmarshal(buf.Bytes(), response)
 	if err != nil {
 		return err
@@ -134,6 +182,19 @@ func (rest *hostingDeRestAPI) call(function string, request interface{}, respons
 func (rest *hostingDeRestAPI) zonesFind() (*hostingDeZoneConfigsFindResponse, error) {
 	request := &hostingDeZoneConfigsFindRequest{rest.authToken}
 	response := new(hostingDeZoneConfigsFindResponse)
+
+	err := rest.call("zoneConfigsFind", request, response)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	return response, nil
+}
+
+func (rest *hostingDeRestAPI) recordsFind(zoneConfigId string) (*hostingDeRecordsFindResponse, error) {	
+	request := &hostingDeRecordsFindRequest{rest.authToken, hostingDeRecordsFindRequestFilter{"zoneConfigId", zoneConfigId}}
+	response := new(hostingDeRecordsFindResponse)
 
 	err := rest.call("zoneConfigsFind", request, response)
 	if err != nil {
