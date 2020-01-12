@@ -20,26 +20,26 @@ type hostingDeZoneConfigsFindRequest struct {
 }
 
 type hostingDeMetadata struct {
-	ClientTransactionId string `json:"clientTransactionId"`
-	ServerTransactionId string `json:"serverTransactionId"`
+	ClientTransactionID string `json:"clientTransactionId"`
+	ServerTransactionID string `json:"serverTransactionId"`
 }
 
 type hostingDeZoneConfigSoaValues struct {
 	Refresh     int `json:"refresh"`
 	Retry       int `json:"retry"`
 	Expire      int `json:"expire"`
-	Ttl         int `json:"ttl"`
-	NegativeTtl int `json:"negativeTtl"`
+	TTL         int `json:"ttl"`
+	NegativeTTL int `json:"negativeTtl"`
 }
 
 type hostingDeZoneConfig struct {
-	Id                    string                       `json:"id"`
-	AccountId             string                       `json:"accountId"`
-	DnsSecMode            string                       `json:"dnsSecMode"`
+	ID                    string                       `json:"id"`
+	AccountID             string                       `json:"accountId"`
+	DNSSecMode            string                       `json:"dnsSecMode"`
 	EmailAddress          string                       `json:"emailAddress"`
 	AddDate               string                       `json:"addDate"`
 	LastChangeDate        string                       `json:"lastChangeDate"`
-	MasterIp              string                       `json:"masterIp"`
+	MasterIP              string                       `json:"masterIp"`
 	Name                  string                       `json:"name"`
 	NameUnicode           string                       `json:"nameUnicode"`
 	SoaValues             hostingDeZoneConfigSoaValues `json:"soaValues"`
@@ -58,6 +58,19 @@ type hostingDeZoneConfigsFindResponse struct {
 	Status   string                               `json:"status"`
 	Metadata hostingDeMetadata                    `json:"metadata"`
 	Response hostingDeZoneConfigsFindResponseData `json:"response"`
+}
+
+type hostingDeRecord struct {
+	ID string `json:"id"`
+	Type string `json:"type"`
+	Content string `json:"content"`
+	TTL int `json:"ttl"`
+}
+
+type hostingDeZoneUpdate struct {
+	ZoneConfig hostingDeZoneConfig `json:"zoneConfig"`
+	RecordsToAdd []hostingDeRecord `json:"recordsToAdd"`
+	RecordsToDelete []hostingDeRecord `json:"recordsToDelete"`
 }
 
 func newhostingDeRestAPI(url string, authToken string) *hostingDeRestAPI {
