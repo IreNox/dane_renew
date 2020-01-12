@@ -165,10 +165,7 @@ func (rest *hostingDeRestAPI) call(function string, request interface{}, respons
 	}
 
 	if len(restResponse.Errors) > 0 {
-		var 
-		for _, restError := range restResponse.Erros {
-
-		}
+		return fmt.Errorf(restResponse.Errors[0].Text)
 	}
 
 	err = json.Unmarshal(buf.Bytes(), response)
