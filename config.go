@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"fmt"
+	"path/filepath"
 	"os"
 )
 
@@ -13,10 +14,30 @@ type config struct {
 	Domains 	[]string `json:"domains"`
 }
 
-func readConfig(configPath string, config *config) error {
+func configPath() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+
+	dir, err := filepath.Abs(filepath.Dir(exe))
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, "config.json"), nil
+}
+
+func readConfig(config *config) error {
+	configPath, err := configPath()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Load config from: %s\n", configPath)
+
 	configFile, err := os.Open(configPath)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
@@ -24,7 +45,6 @@ func readConfig(configPath string, config *config) error {
 
 	configBytes, err := ioutil.ReadAll(configFile)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 

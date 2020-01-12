@@ -61,16 +61,31 @@ type hostingDeZoneConfigsFindResponse struct {
 }
 
 type hostingDeRecord struct {
-	ID string `json:"id"`
-	Type string `json:"type"`
+	//ID      string `json:"id"`
+	Type    string `json:"type"`
+	Name	string `json:"name"`
 	Content string `json:"content"`
-	TTL int `json:"ttl"`
+	TTL     int    `json:"ttl"`
 }
 
-type hostingDeZoneUpdate struct {
+type hostingDeZoneUpdateRequest struct {
+	AuthToken       string              `json:"authToken"`
+	ZoneConfig      hostingDeZoneConfig `json:"zoneConfig"`
+	RecordsToAdd    []hostingDeRecord   `json:"recordsToAdd"`
+	RecordsToDelete []hostingDeRecord   `json:"recordsToDelete"`
+}
+
+type hostingDeZoneUpdateResponseData struct {
 	ZoneConfig hostingDeZoneConfig `json:"zoneConfig"`
-	RecordsToAdd []hostingDeRecord `json:"recordsToAdd"`
-	RecordsToDelete []hostingDeRecord `json:"recordsToDelete"`
+	Records    []hostingDeRecord     `json:"records"`
+}
+
+type hostingDeZoneUpdateResponse struct {
+	Errors   []string                        `json:"errors"`
+	Warnings []string                        `json:"warnings"`
+	Status   string                          `json:"status"`
+	Metadata hostingDeMetadata               `json:"metadata"`
+	Response hostingDeZoneUpdateResponseData `json:"response"`
 }
 
 func newhostingDeRestAPI(url string, authToken string) *hostingDeRestAPI {
@@ -85,45 +100,59 @@ func newhostingDeRestAPI(url string, authToken string) *hostingDeRestAPI {
 	return rest
 }
 
-func (rest *hostingDeRestAPI) call(function string, request interface{}) ([]byte, error) {
+func (rest *hostingDeRestAPI) call(function string, request interface{}, response interface{}) error {
 	requestBytes, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	url := rest.url + function
 	fmt.Printf("Request URL: %s, Body: %s\n", url, string(requestBytes))
 
-	response, err := http.Post(url, "application/json", bytes.NewReader(requestBytes))
+	httpResponse, err := http.Post(url, "application/json", bytes.NewReader(requestBytes))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP error status: %d", response.StatusCode)
+	if httpResponse.StatusCode != 200 {
+		return fmt.Errorf("HTTP error status: %d", httpResponse.StatusCode)
 	}
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(response.Body)
+	buf.ReadFrom(httpResponse.Body)
+
 	ioutil.WriteFile("D:\\test.json", buf.Bytes(), 0777)
-	return buf.Bytes(), nil
+
+	err = json.Unmarshal(buf.Bytes(), response)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (rest *hostingDeRestAPI) zonesFind() (*hostingDeZoneConfigsFindResponse, error) {
 	request := &hostingDeZoneConfigsFindRequest{rest.authToken}
-
-	responseBytes, err := rest.call("zoneConfigsFind", request)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
 	response := new(hostingDeZoneConfigsFindResponse)
-	err = json.Unmarshal(responseBytes, response)
+
+	err := rest.call("zoneConfigsFind", request, response)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
 
 	return response, nil
+}
+
+func (rest *hostingDeRestAPI) zoneUpdate(zoneConfig hostingDeZoneConfig, recordsToAdd []hostingDeRecord, recordsToDelete []hostingDeRecord) error {
+	request := &hostingDeZoneUpdateRequest{rest.authToken, zoneConfig, recordsToAdd, recordsToDelete}
+	response := new(hostingDeZoneUpdateResponse);
+
+	err := rest.call("zoneUpdate", request, response)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 }

@@ -13,27 +13,50 @@ func getTopLevelDomain(domain string) string {
 	return domain
 }
 
-func findZone(zones *hostingDeZoneConfigsFindResponse, domain string) *hostingDeZoneConfig {
+func findZone(rest *hostingDeRestAPI, domain string) (*hostingDeZoneConfig, error) {
+	topLevelDomain := getTopLevelDomain(domain)
+
+	zones, err := rest.zonesFind()
+	if err != nil {
+		return nil, err
+	}
+
 	for _, zone := range zones.Response.Data {
-		if zone.Name == domain {
-			return &zone
+		if zone.Name == topLevelDomain {
+			return &zone, nil
 		}
+	}
+
+	return nil, fmt.Errorf("Could not find '%s' domain", topLevelDomain)
+}
+
+func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) error {
+	domainZoneConfig, err := findZone(rest, domain)
+	if err != nil {
+		return err
+	}
+
+	recordsToAdd := []hostingDeRecord{hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	recordsToDelete := []hostingDeRecord{}
+	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) error {
-	domain = getTopLevelDomain(domain)
-
-	zones, err := rest.zonesFind()
+func deleteAuthRecord(rest* hostingDeRestAPI, domain string, validation string) error {
+	domainZoneConfig, err := findZone(rest, domain)
 	if err != nil {
 		return err
 	}
 
-	domainZone := findZone(zones, domain)
-	if domainZone == nil {
-		return fmt.Errorf("Could nor find '%s' domain", domain)
+	recordsToAdd := []hostingDeRecord{}
+	recordsToDelete := []hostingDeRecord{hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
+	if err != nil {
+		return err
 	}
 
 	return nil
