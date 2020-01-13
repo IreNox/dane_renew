@@ -29,7 +29,7 @@ func main() {
 
 	case *manualCleanupCommand:
 		manualCleanupCmdData := commandData.(*manualCleanupCommand)
-		commandError = deleteAuthRecord(rest, manualCleanupCmdData.domain, manualCleanupCmdData.validation)
+		commandError = deleteAuthRecord(rest, manualCleanupCmdData.domain)
 
 	default:
 		commandError = fmt.Errorf("Unknown command data: %T", commandData)

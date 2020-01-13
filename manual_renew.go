@@ -1,8 +1,9 @@
 package main
 
-import "strings"
-
-import "fmt"
+import (
+	"strings"
+	"fmt"
+)
 
 func getTopLevelDomain(domain string) string {
 	for strings.Count(domain, ".") > 1 {
@@ -30,14 +31,34 @@ func findZone(rest *hostingDeRestAPI, domain string) (*hostingDeZoneConfig, erro
 	return nil, fmt.Errorf("Could not find '%s' domain", topLevelDomain)
 }
 
+func findRecord(rest *hostingDeRestAPI, domain string, recordType string) (*hostingDeZoneConfig, *hostingDeFullRecord, error) {
+	domainZoneConfig, err := findZone(rest, domain)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	records, err := rest.recordsFind(domainZoneConfig.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for _, record := range records.Response.Data {
+		if record.Name == domain && record.Type == recordType {
+			return domainZoneConfig, &record, nil
+		}
+	}
+
+	return nil, nil, fmt.Errorf("Could not find record '%s' of type '%s'", domain, recordType)
+}
+
 func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) error {
 	domainZoneConfig, err := findZone(rest, domain)
 	if err != nil {
 		return err
 	}
 
-	recordsToAdd := []hostingDeRecord{hostingDeRecord{"authChallenge", "TXT", "_acme-challenge." + domain, validation, 120}}
-	recordsToDelete := []hostingDeRecord{}
+	recordsToAdd := []hostingDeRecord{hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	recordsToDelete := []hostingDeFullRecord{}
 	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
 	if err != nil {
 		return err
@@ -46,14 +67,14 @@ func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) 
 	return nil
 }
 
-func deleteAuthRecord(rest* hostingDeRestAPI, domain string, validation string) error {
-	domainZoneConfig, err := findZone(rest, domain)
+func deleteAuthRecord(rest* hostingDeRestAPI, domain string) error {
+	domainZoneConfig, record, err := findRecord(rest, "_acme-challenge." + domain, "TXT")
 	if err != nil {
 		return err
 	}
 
 	recordsToAdd := []hostingDeRecord{}
-	recordsToDelete := []hostingDeRecord{} //hostingDeRecord{"TXT", "_acme-challenge." + domain, validation, 120}}
+	recordsToDelete := []hostingDeFullRecord{*record}
 	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
 	if err != nil {
 		return err

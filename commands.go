@@ -30,8 +30,7 @@ type manualAuthCommand struct {
 }
 
 type manualCleanupCommand struct {
-	domain     string
-	validation string
+	domain string
 }
 
 func (context *commandsContext) addCommand(name string, target interface{}) *commandsCommand {
@@ -92,7 +91,6 @@ func evalCommands() (interface{}, error) {
 	manualCleanupCmdData := new(manualCleanupCommand)
 	manualCleanupCmd := context.addCommand("manual-cleanup", manualCleanupCmdData)
 	manualCleanupCmd.addArgument("domain", "domain name", "CERTBOT_DOMAIN", &manualCleanupCmdData.domain)
-	manualCleanupCmd.addArgument("validation", "validation string", "CERTBOT_VALIDATION", &manualCleanupCmdData.validation);
 
 	return context.parse()
 }
