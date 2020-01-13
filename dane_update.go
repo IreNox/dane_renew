@@ -83,5 +83,11 @@ func updateDaneRecord(rest* hostingDeRestAPI, cfg config, domain string, certPat
 		return nil
 	}
 
-	return rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
+	err := rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Record '%s' updated to '%s'.\n", daneDomain, publicKeyHashHex )
+	return nil
 }
