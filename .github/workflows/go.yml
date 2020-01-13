@@ -30,7 +30,8 @@ jobs:
     - name: Copy files
       run: |
         mkdir output
-        cp scripts/* output
+        cp configs/* output
+        cp scripts/* output        
         cp letsencrypt_helper output
     
     - name: Upload Artifacts
