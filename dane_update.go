@@ -77,17 +77,19 @@ func updateDaneRecord(rest* hostingDeRestAPI, cfg config, domain string, certPat
 
 		recordsToAdd = append(recordsToAdd, hostingDeRecord{"TLSA", daneDomain, daneValue, 86400});
 		recordsToDelete = append(recordsToDelete, *record)
+
+		fmt.Printf("Update record '%s' to '%s'.\n", daneDomain, publicKeyHashHex )
 	}
 
 	if(len(recordsToAdd) == 0 && len(recordsToDelete) == 0) {
 		return nil
 	}
 
-	err := rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
+	err = rest.zoneUpdate(*domainZoneConfig, recordsToAdd, recordsToDelete)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Record '%s' updated to '%s'.\n", daneDomain, publicKeyHashHex )
+	fmt.Printf("Update successful!\n" )
 	return nil
 }
