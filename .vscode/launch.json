@@ -18,9 +18,8 @@
             "mode": "debug",
             "program": "${workspaceFolder}",
             "args": [
-                "dane-update",
-                "-domain=www.ioniel.de",
-                "-cert=www.ioniel.net.pem"
+                "manual-cleanup",
+                "-domain=test.ioniel.net"
             ]
         }
     ]

@@ -1,7 +1,7 @@
 package main
 
 func createAuthRecord(rest *hostingDeRestAPI, domain string, validation string) error {
-	domainZoneConfig, err := findZone(rest, domain)
+	domainZoneConfig, err := requestAndFindSafeZone(rest, domain)
 	if err != nil {
 		return err
 	}
