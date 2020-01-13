@@ -30,11 +30,11 @@ jobs:
     - name: Copy files
       run: |
         mkdir output
-        cp configs/* output
+        cp scripts/* output
         cp letsencrypt_helper output
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v1
       with:
-        name: package
+        name: letsencrypt_helper
         path: output
