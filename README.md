@@ -1,2 +1,2 @@
 # dane_renew
-GO program to renew my DANE entries in my DNS Zone
+GO program to renew manual certificates and update DANE entries in DNS Zone for hosting.de Rest API
