@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
 func main() {
@@ -17,7 +18,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	fmt.Printf("Config: %s\n", cfg)
 
 	rest := newhostingDeRestAPI(cfg.URL, cfg.AuthToken)
 
@@ -31,12 +31,16 @@ func main() {
 		manualCleanupCmdData := commandData.(*manualCleanupCommand)
 		commandError = deleteAuthRecord(rest, manualCleanupCmdData.domain)
 
+	case *daneUpdateCommand:
+		daneUpdateCmdData := commandData.(*daneUpdateCommand)
+		commandError = updateDaneRecord(rest, cfg, daneUpdateCmdData.domain, daneUpdateCmdData.certPath)
+
 	default:
 		commandError = fmt.Errorf("Unknown command data: %T", commandData)
 	}
 
 	if commandError != nil {
 		log.Fatal(commandError)
-		return
+		os.Exit(1)
 	}
 }

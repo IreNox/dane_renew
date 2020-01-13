@@ -33,6 +33,11 @@ type manualCleanupCommand struct {
 	domain string
 }
 
+type daneUpdateCommand struct {
+	domain   string
+	certPath string
+}
+
 func (context *commandsContext) addCommand(name string, target interface{}) *commandsCommand {
 	command := &commandsCommand{name: name, target: target}
 	command.flagSet = flag.NewFlagSet(name, flag.ExitOnError)
@@ -54,11 +59,15 @@ func (context *commandsContext) parse() (interface{}, error) {
 
 		for _, argument := range command.arguments {
 			if *argument.argsValue == "" {
-				envValue, exists := os.LookupEnv(argument.envName)
-				if !exists {
-					return nil, fmt.Errorf("No argument '-%s' and no '%s' environment variable found", argument.name, argument.envName)
+				if argument.envName != "" {
+					envValue, exists := os.LookupEnv(argument.envName)
+					if !exists {
+						return nil, fmt.Errorf("No argument '-%s' and no '%s' environment variable found", argument.name, argument.envName)
+					}
+					*argument.target = envValue
+				} else {
+					return nil, fmt.Errorf("No argument '-%s' found", argument.name)
 				}
-				*argument.target = envValue
 			} else {
 				*argument.target = *argument.argsValue
 			}
@@ -91,6 +100,11 @@ func evalCommands() (interface{}, error) {
 	manualCleanupCmdData := new(manualCleanupCommand)
 	manualCleanupCmd := context.addCommand("manual-cleanup", manualCleanupCmdData)
 	manualCleanupCmd.addArgument("domain", "domain name", "CERTBOT_DOMAIN", &manualCleanupCmdData.domain)
+
+	daneUpdateCmdData := new(daneUpdateCommand)
+	daneUpdateCmd := context.addCommand("dane-update", daneUpdateCmdData)
+	daneUpdateCmd.addArgument("domain", "domain name", "", &daneUpdateCmdData.domain)
+	daneUpdateCmd.addArgument("cert", "certificate path", "", &daneUpdateCmdData.certPath)
 
 	return context.parse()
 }

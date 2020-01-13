@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -96,6 +95,7 @@ type hostingDeZoneConfigsFindResponseData struct {
 type hostingDeRecordsFindRequest struct {
 	AuthToken string                            `json:"authToken"`
 	Filter    hostingDeRecordsFindRequestFilter `json:"filter"`
+	Limit     int                               `json:"limit"`
 }
 
 type hostingDeRecordsFindRequestFilter struct {
@@ -146,8 +146,6 @@ func (rest *hostingDeRestAPI) call(function string, request interface{}, respons
 	}
 
 	url := rest.url + function
-	fmt.Printf("Request URL: %s, Body: %s\n", url, string(requestBytes))
-
 	httpResponse, err := http.Post(url, "application/json", bytes.NewReader(requestBytes))
 	if err != nil {
 		return err
@@ -159,8 +157,6 @@ func (rest *hostingDeRestAPI) call(function string, request interface{}, respons
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(httpResponse.Body)
-
-	ioutil.WriteFile("D:\\test.json", buf.Bytes(), 0777)
 
 	var restResponse hostingDeResponse
 	err = json.Unmarshal(buf.Bytes(), &restResponse)
@@ -193,8 +189,8 @@ func (rest *hostingDeRestAPI) zonesFind() (*hostingDeZoneConfigsFindResponse, er
 	return response, nil
 }
 
-func (rest *hostingDeRestAPI) recordsFind(zoneConfigID string) (*hostingDeRecordsFindResponse, error) {
-	request := &hostingDeRecordsFindRequest{rest.authToken, hostingDeRecordsFindRequestFilter{"zoneConfigId", zoneConfigID}}
+func (rest *hostingDeRestAPI) recordsFind(zoneConfigID string, limit int) (*hostingDeRecordsFindResponse, error) {
+	request := &hostingDeRecordsFindRequest{rest.authToken, hostingDeRecordsFindRequestFilter{"zoneConfigId", zoneConfigID}, limit}
 	response := new(hostingDeRecordsFindResponse)
 
 	err := rest.call("recordsFind", request, response)

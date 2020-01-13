@@ -3,15 +3,20 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"fmt"
 	"path/filepath"
 	"os"
 )
 
+type configDomain struct {
+	Name     string `json:"name"`
+	Protocol string `json:"protocol"`
+	Port     int    `json:"port"`
+}
+
 type config struct {
-	URL     	string   `json:"url"`
-	AuthToken   string   `json:"authToken"`
-	Domains 	[]string `json:"domains"`
+	URL     	string         `json:"url"`
+	AuthToken   string         `json:"authToken"`
+	Domains     []configDomain `json:"domains"`
 }
 
 func configPath() (string, error) {
@@ -33,8 +38,6 @@ func readConfig(config *config) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Load config from: %s\n", configPath)
 
 	configFile, err := os.Open(configPath)
 	if err != nil {

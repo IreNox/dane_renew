@@ -1,0 +1,21 @@
+{
+	"url": "https://secure.hosting.de/api/dns/v1/json/",
+	"authToken": "see https://secure.hosting.de/profile",
+	"domains" : [
+		{
+			"name": "test.com",
+			"protocol": "tcp",
+			"port": 443
+		},
+		{
+			"name": "test.com",
+			"protocol": "tcp",
+			"port": 25
+		},
+		{
+			"name": "www.test.com",
+			"protocol": "tcp",
+			"port": 443
+		}
+	]
+}
