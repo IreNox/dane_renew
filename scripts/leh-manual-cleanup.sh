@@ -1,2 +1,4 @@
 #!/bin/sh
-letsencrypt_helper manual-cleanup -domain=$CERTBOT_DOMAIN
+
+BASEDIR=$(dirname "$0")
+$BASEDIR/letsencrypt_helper manual-cleanup -domain=$CERTBOT_DOMAIN
